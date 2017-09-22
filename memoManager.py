@@ -87,9 +87,7 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/Downloadedmemos/") :
        # Copy the students memo for the personal tutor
        if "personal" in thisstudent.keys() : copyMemo( studentno, thisstudent["personal"], "personal", staffdict[thisstudent["personal"]] )
        # Copy the students memo for the supervisor
-       if "supervisor" in thisstudent.keys() : 
-           print("CHECKING ",  thisstudent )
-           copyMemo( studentno, thisstudent["supervisor"], "supervisor", staffdict[thisstudent["supervisor"]] )
+       if "supervisor" in thisstudent.keys() : copyMemo( studentno, thisstudent["supervisor"], "supervisor", staffdict[thisstudent["supervisor"]] )
        # Now make copies for modules
        for module in thisstudent["modules"] :
            for staff in modteach[module] : 
