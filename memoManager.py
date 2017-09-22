@@ -16,30 +16,53 @@ def copyMemo( number, staff, role, password ) :
 
 
 # Make a dictionary from excel containing the students
-wb = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-maths.xlsx')
-n, student_dictionary, data = 0, {}, xw.Range('Sheet1', 'B3', wkb=wb).table.value
-for col in data[0] :
-    tdict = {}
-    tdict["advisor"], tdict["personal"], tdict["modules"] = data[3][n], data[4][n], []
-    for mod in [9,11,13,15,17,19] :
-        if data[mod][n]!="End" : tdict["modules"].append( data[mod][n] ) 
-    student_dictionary[ str(int(col)) ] = tdict 
-    n+=1 
+wbp = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-physics.xlsm')
+# Get data on staff numbers from exccel
+n, staffdict, staffdata, staffnumbers = 0, {}, xw.Range("options","G3:G71").value, xw.Range("options","F3:F71").value
+for name in staffdata : 
+    staffdict[ name ] = "Sn@" + str( int(staffnumbers[n]) )
+    n += 1
 
-#print( student_dictionary )
-
-# Get data on staff numbers from excel
-staffdict, staffdata = {}, xw.Range("Sheet4","A2").table.value
-for row in staffdata : staffdict[ row[1] ] = "Sn@" + str( int(row[0]) )
+#for k,n in staffdict.items() : print( k, n )
 
 # Make a dictionary of who teaches each module
-n, modteach, modules, teachers = 0, {}, xw.Range("Sheet3","A1:A83", wkb=wb).value, xw.Range("Sheet3","B1:B83", wkb=wb).value
+n, modteach, modules, teachers = 0, {}, xw.Range("options","K3:K86", wkb=wbp).value, xw.Range("options","L3:L86", wkb=wbp).value
 for module in modules : 
     modteach[module] = teachers[n].split()
     # Check we have staff numbers for everyone who teaches a module
     for staff in modteach[module] :
         if staff not in staffdict : RuntimeError("staff number not found for " + staff)
     n+=1 
+
+#for k, n in modteach.items() : print( k, n )
+
+n, student_dictionary, data = 0, {}, xw.Range('main', 'B8', wkb=wbp).table.value
+for col in data[0] :
+    tdict = {}
+    tdict["modules"] = []
+    if (data[12][n]!=None) & (data[12][n]!="End") : tdict["advisor"] = data[12][n] 
+    if (data[13][n]!=None) & (data[13][n]!="End") : tdict["personal"] = data[13][n]
+    if (data[36][n]!=None) & (data[36][n]!="End") : tdict["supervisor"] = data[36][n] 
+    for mod in [16,18,20,22,24,26,28,30,32,34] :
+        if (data[mod][n]!=None) & (data[mod][n]!="End") : tdict["modules"].append( data[mod][n] )
+    student_dictionary[ str(int(col)) ] = tdict 
+    n += 1
+
+wbm = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-maths.xlsx')
+n, data = 0, xw.Range('Sheet1', 'B3', wkb=wbm).table.value
+for col in data[0] :
+    tdict = {}
+    if (data[3][n]!=None) & (data[3][n]!="End") : tdict["advisor"] = data[3][n] 
+    if (data[4][n]!=None) & (data[4][n]!="End") : tdict["personal"] = data[4][n]
+    if (data[23][n]!=None) & (data[23][n]!="End") : tdict["supervisor"] = data[23][n]
+    tdict["modules"] = []
+    for mod in [9,11,13,15,17,19,21] :
+        if (data[mod][n]!=None) & (data[mod][n]!="End") : tdict["modules"].append( data[mod][n] ) 
+    student_dictionary[ str(int(col)) ] = tdict 
+    n+=1 
+
+#for k, n in student_dictionary.items() : print( k, n )
+
 
 # Now work through all the memos that were downloaded
 os.mkdir("Memos")
@@ -53,15 +76,22 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/Downloadedmemos/") :
        studentno = text[start:end].replace("Student No:","").rstrip().strip()
 
        # Now find the details of the student from excel
+       print("Making memos for student number " + studentno + " with memo " + memo )
        if studentno not in student_dictionary : RuntimeError("Could not find student number " + studentno + " for memo " + memo )
        thisstudent = student_dictionary[ studentno ] 
 
        # Now copy the memo to my stash of memos and rename to student number
        shutil.copy( '/Users/gareth/Desktop/DS/Downloadedmemos/' + memo.replace(".docx",".pdf"), "Memos/" + studentno + ".pdf" )
        # Copy the students memo for the advisor of study 
-       copyMemo( studentno, thisstudent["advisor"], "advisor", staffdict[thisstudent["advisor"]] )
+       if "advisor" in thisstudent.keys() : copyMemo( studentno, thisstudent["advisor"], "advisor", staffdict[thisstudent["advisor"]] )
        # Copy the students memo for the personal tutor
-       copyMemo( studentno, thisstudent["personal"], "personal", staffdict[thisstudent["personal"]] )
+       if "personal" in thisstudent.keys() : copyMemo( studentno, thisstudent["personal"], "personal", staffdict[thisstudent["personal"]] )
+       # Copy the students memo for the supervisor
+       if "supervisor" in thisstudent.keys() : 
+           print("CHECKING ",  thisstudent )
+           copyMemo( studentno, thisstudent["supervisor"], "supervisor", staffdict[thisstudent["supervisor"]] )
        # Now make copies for modules
        for module in thisstudent["modules"] :
-           for staff in modteach[module] : copyMemo( studentno, staff, module, staffdict[staff] )
+           for staff in modteach[module] : 
+               copyMemo( studentno, staff, module, staffdict[staff] )
+       print( "Made memo for student " + studentno + " with memo " + memo )
