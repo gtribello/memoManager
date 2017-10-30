@@ -16,9 +16,9 @@ def copyMemo( number, staff, role, password ) :
 
 
 # Make a dictionary from excel containing the students
-wbp = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-physics.xlsm')
+wbp = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-all_students.xlsm')
 # Get data on staff numbers from exccel
-n, staffdict, staffdata, staffnumbers = 0, {}, xw.Range("options","G3:G71").value, xw.Range("options","F3:F71").value
+n, staffdict, staffdata, staffnumbers = 0, {}, xw.Range("options","G3:G72").value, xw.Range("options","F3:F72").value
 for name in staffdata : 
     staffdict[ name ] = "Sn@" + str( int(staffnumbers[n]) )
     n += 1
@@ -39,29 +39,31 @@ for module in modules :
 n, student_dictionary, data = 0, {}, xw.Range('main', 'B8', wkb=wbp).table.value
 for col in data[0] :
     tdict = {}
-    tdict["modules"] = []
+    tdict["supervisor"], tdict["modules"] = [], []
     if (data[12][n]!=None) & (data[12][n]!="End") : tdict["advisor"] = data[12][n] 
     if (data[13][n]!=None) & (data[13][n]!="End") : tdict["personal"] = data[13][n]
-    if (data[36][n]!=None) & (data[36][n]!="End") : tdict["supervisor"] = data[36][n] 
+    if (data[36][n]!=None) & (data[36][n]!="End") : tdict["supervisor"].append( data[36][n] )
+    if (data[37][n]!=None) & (data[37][n]!="End") : tdict["supervisor"].append( data[37][n] )
+    if (data[38][n]!=None) & (data[38][n]!="End") : tdict["supervisor"].append( data[38][n] )
     for mod in [16,18,20,22,24,26,28,30,32,34] :
         if (data[mod][n]!=None) & (data[mod][n]!="End") : tdict["modules"].append( data[mod][n] )
     student_dictionary[ str(int(col)) ] = tdict 
     n += 1
 
-wbm = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-maths.xlsx')
-n, data = 0, xw.Range('Sheet1', 'B3', wkb=wbm).table.value
-for col in data[0] :
-    tdict = {}
-    if (data[3][n]!=None) & (data[3][n]!="End") : tdict["advisor"] = data[3][n] 
-    if (data[4][n]!=None) & (data[4][n]!="End") : tdict["personal"] = data[4][n]
-    if (data[23][n]!=None) & (data[23][n]!="End") : tdict["supervisor"] = data[23][n]
-    tdict["modules"] = []
-    for mod in [9,11,13,15,17,19,21] :
-        if (data[mod][n]!=None) & (data[mod][n]!="End") : tdict["modules"].append( data[mod][n] ) 
-    student_dictionary[ str(int(col)) ] = tdict 
-    n+=1 
+# wbm = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-maths.xlsx')
+# n, data = 0, xw.Range( 'Sheet1', 'B3', wkb=wbm ).table.value
+# for col in data[0] :
+#     tdict = {}
+#     tdict["modules"], tdict["supervisor"] = [], []
+#     if (data[3][n]!=None) & (data[3][n]!="End") : tdict["advisor"] = data[3][n] 
+#     if (data[4][n]!=None) & (data[4][n]!="End") : tdict["personal"] = data[4][n]
+#     if (data[23][n]!=None) & (data[23][n]!="End") : tdict["supervisor"].append( data[23][n] )
+#     for mod in [9,11,13,15,17,19,21] :
+#         if (data[mod][n]!=None) & (data[mod][n]!="End") : tdict["modules"].append( data[mod][n] ) 
+#     student_dictionary[ str(int(col)) ] = tdict 
+#     n+=1 
 
-#for k, n in student_dictionary.items() : print( k, n )
+# for k, n in student_dictionary.items() : print( k, n )
 
 
 # Now work through all the memos that were downloaded
@@ -87,7 +89,7 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/Downloadedmemos/") :
        # Copy the students memo for the personal tutor
        if "personal" in thisstudent.keys() : copyMemo( studentno, thisstudent["personal"], "personal", staffdict[thisstudent["personal"]] )
        # Copy the students memo for the supervisor
-       if "supervisor" in thisstudent.keys() : copyMemo( studentno, thisstudent["supervisor"], "supervisor", staffdict[thisstudent["supervisor"]] )
+       for tsuper in thisstudent["supervisor"] : copyMemo( studentno, tsuper, "supervisor", staffdict[tsuper] )
        # Now make copies for modules
        for module in thisstudent["modules"] :
            for staff in modteach[module] : 
