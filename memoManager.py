@@ -16,9 +16,11 @@ def copyMemo( number, staff, role, password ) :
 
 
 # Make a dictionary from excel containing the students
-wbp = xw.Workbook( '/Users/gareth/Desktop/DS/DS-list-2017-2018-all_students.xlsm')
+wbp = xw.Book( '/Users/gareth/Desktop/DS/DS-list-2017-2018-all_students.xlsm')
+# Get a sheet from the workbook
+sht = xw.sheets['options']
 # Get data on staff numbers from exccel
-n, staffdict, staffdata, staffnumbers = 0, {}, xw.Range("options","G3:G72").value, xw.Range("options","F3:F72").value
+n, staffdict, staffdata, staffnumbers = 0, {}, sht.range("G3:G72").value, sht.range("F3:F72").value
 for name in staffdata : 
     staffdict[ name ] = "Sn@" + str( int(staffnumbers[n]) )
     n += 1
@@ -26,7 +28,7 @@ for name in staffdata :
 #for k,n in staffdict.items() : print( k, n )
 
 # Make a dictionary of who teaches each module
-n, modteach, modules, teachers = 0, {}, xw.Range("options","K3:K86", wkb=wbp).value, xw.Range("options","L3:L86", wkb=wbp).value
+n, modteach, modules, teachers = 0, {}, sht.range("K3:K86").value, sht.range("L3:L86").value
 for module in modules : 
     modteach[module] = teachers[n].split()
     # Check we have staff numbers for everyone who teaches a module
@@ -36,7 +38,8 @@ for module in modules :
 
 #for k, n in modteach.items() : print( k, n )
 
-n, student_dictionary, data = 0, {}, xw.Range('main', 'B8', wkb=wbp).table.value
+shd = xw.sheets["main"]
+n, student_dictionary, data = 0, {}, shd.range('B8').expand().value
 for col in data[0] :
     tdict = {}
     tdict["supervisor"], tdict["modules"] = [], []
