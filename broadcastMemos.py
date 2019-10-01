@@ -3,6 +3,8 @@ import os
 from getpass import getpass
 from requests_ntlm import HttpNtlmAuth
 
+# TODO : This script needs to be reworked so that it deletes from all directories on sharepoint first and then uploads from files on my computer
+
 api_url = "https://intranet.qol.qub.ac.uk/schools/smp/education/_api"
 
 sp_user = input('User: ')
