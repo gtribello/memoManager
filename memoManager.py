@@ -89,6 +89,7 @@ for col in data[0] :
 os.mkdir("Memos")
 os.mkdir("Allstaff")
 for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
+    if memo.endswith(".doc") : RuntimeError("Found doc file in Downloadedmemos - make this a docx file") 
     if memo.endswith(".docx") :
        # Get the student number from the memo
        text = textract.process('/Users/gareth/Desktop/DS/2019/Downloadedmemos/' + memo ).decode("utf-8")
