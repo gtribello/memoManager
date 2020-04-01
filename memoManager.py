@@ -28,7 +28,11 @@ for name in staffdata :
 # for k,n in staffdict.items() : print( k, n )
 
 # List of possible student requirements
-possible_requirements = ["Green Room", "Individual room", "Cubical 6-8", "font size 18 on A4 paper", "Flexible deadlines for Assignments", "Permission to record lectures/tutorials", "Materials in alternative format", "Adjustments for Group work", "Adjustments for Oral Presentations", "Extra time", "Flexibility with deadlines", "Recording of Lectures"]
+possible_requirements = ["Green Room", "Individual room", "Cubical 6-8", "font size 18 on A4 paper", "Flexible deadlines for Assignments", "Permission to record lectures/tutorials", "Materials in alternative format", "Adjustments for Group work", "Adjustments for Oral Presentations", "Extra time", "Flexibility with deadlines", "Recording of Lectures","Rest breaks"]
+
+# Make a dictionary of which students need what special measures
+special_requirements = {}
+for requirement in possible_requirements : special_requirements[requirement] = []
 
 # Make a dictionary of who teaches each module
 n, modteach, modules, teachers = 0, {}, sht.range("K3:K85").value, sht.range("L3:L85").value
@@ -110,6 +114,9 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
        if "personal" in thisstudent.keys() : copyMemo( studentno, thisstudent["personal"], "personal", staffdict[thisstudent["personal"]] )
        # Copy the students memo for the supervisor
        for tsuper in thisstudent["supervisor"] : copyMemo( studentno, tsuper, "supervisor", staffdict[tsuper] )
+       # Contribute to summary document of requirements 
+       for requirement in possible_requirements :
+           if( text.find(requirement)!=-1 ) : special_requirements[requirement].append( studentno )
        # Now make copies for modules
        for module in thisstudent["modules"] :
            # Nothing to do for computer science modules 
@@ -124,8 +131,21 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
                copyMemo( studentno, staff, module, staffdict[staff] )
        print( "Made memo for student " + studentno + " with memo " + memo )
 
-# Get information for teaching office on green room student in each module
+
+# Make summary information on students who require each special requirement identified in the memos
 os.mkdir("Office")
+of = open('/Users/gareth/Desktop/DS/2019/Office/special_requirements.txt',"w")
+for requirement in possible_requirements :
+    if len(special_requirements[requirement])>0 :
+       of.write("Requirement: " + requirement + "\n" )
+       of.write("--------------------------------- \n")
+       of.write("\n")
+       for student in special_requirements[requirement] : of.write( student + " ")
+       of.write("\n")
+       of.write("\n") 
+of.close()
+
+# Get information for teaching office on green room student in each module
 os.mkdir("Allstaff/Patrick_J")
 os.mkdir("Allstaff/Lindsay_V")
 for module, dicto in modteach.items() :
