@@ -28,11 +28,21 @@ for name in staffdata :
 # for k,n in staffdict.items() : print( k, n )
 
 # List of possible student requirements
-possible_requirements = ["Green Room", "Individual room", "Cubical 6-8", "font size 18 on A4 paper", "Flexible deadlines for Assignments", "Permission to record lectures/tutorials", "Materials in alternative format", "Adjustments for Group work", "Adjustments for Oral Presentations", "Extra time", "Flexibility with deadlines", "Recording of Lectures","Rest breaks"]
+possible_requirements = ["Green Room", "Individual room", "Cubical 6-8", "font size 18 on A4 paper", "Flexible deadlines for Assignments", "Permission to record lectures/tutorials", "Materials in alternative format", "Adjustments for Group work", "Adjustments for Oral Presentations", "Extra time", "Flexibility with deadlines", "Recording of Lectures", "Rest breaks"]
+
+# List of possible additional times
+extra_times = ["10","33","25","50","100"]
 
 # Make a dictionary of which students need what special measures
-special_requirements = {}
-for requirement in possible_requirements : special_requirements[requirement] = []
+all_requirements, special_requirements = [], {}
+for requirement in possible_requirements : 
+    if( requirement=="Extra time" ) :
+        for etime in extra_times : 
+            all_requirements.append(requirement + "_" + etime)
+            special_requirements[requirement + "_" + etime] = [] 
+    else : 
+        all_requirements.append(requirement) 
+        special_requirements[requirement] = []
 
 # Make a dictionary of who teaches each module
 n, modteach, modules, teachers = 0, {}, sht.range("K3:K85").value, sht.range("L3:L85").value
@@ -44,7 +54,10 @@ for module in modules :
     else : modteach[mod]["project"] = False
     modteach[mod]["project_students"] = [] 
     modteach[mod]["teachers"] = teachers[n].split()
-    for requirement in possible_requirements : modteach[mod][requirement] = []
+    for requirement in possible_requirements : 
+        if( requirement=="Extra time" ) :
+            for etime in extra_times : modteach[mod][requirement + "_" + etime] = [] 
+        else : modteach[mod][requirement] = []
     # Check we have staff numbers for everyone who teaches a module
     for staff in modteach[mod]["teachers"] :
         if staff not in staffdict : RuntimeError("staff number not found for " + staff)
@@ -116,14 +129,20 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
        for tsuper in thisstudent["supervisor"] : copyMemo( studentno, tsuper, "supervisor", staffdict[tsuper] )
        # Contribute to summary document of requirements 
        for requirement in possible_requirements :
-           if( text.find(requirement)!=-1 ) : special_requirements[requirement].append( studentno )
+           if( requirement=="Extra time" and text.find(requirement)!=-1 ) :
+               for etime in extra_times :
+                   if( text.find(etime)!=-1 ) : special_requirements[requirement + "_" + etime].append( studentno )
+           elif( text.find(requirement)!=-1 ) : special_requirements[requirement].append( studentno )
        # Now make copies for modules
        for module in thisstudent["modules"] :
            # Nothing to do for computer science modules 
            if "CSC" in module : continue
            # Check all things we need to note down
            for requirement in possible_requirements :
-               if( text.find(requirement)!=-1 ) : modteach[module][requirement].append( studentno )
+               if( requirement=="Extra time" and text.find(requirement)!=-1 ) :
+                   for etime in extra_times : 
+                       if( text.find(etime)!=-1 ) : modteach[module][requirement + "_" + etime].append( studentno )
+               elif( text.find(requirement)!=-1 ) : modteach[module][requirement].append( studentno )
            # Check if this is a project module and add to list of project students if it is
            if modteach[module]["project"] : modteach[module]["project_students"].append( studentno )
            # Coopy the modules we need
@@ -135,7 +154,7 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
 # Make summary information on students who require each special requirement identified in the memos
 os.mkdir("Office")
 of = open('/Users/gareth/Desktop/DS/2019/Office/special_requirements.txt',"w")
-for requirement in possible_requirements :
+for requirement in all_requirements :
     if len(special_requirements[requirement])>0 :
        of.write("Requirement: " + requirement + "\n" )
        of.write("--------------------------------- \n")
@@ -155,7 +174,7 @@ for module, dicto in modteach.items() :
        for student in dicto["project_students"] : print( student )
     # Print info for teaching office
     of = open('/Users/gareth/Desktop/DS/2019/Office/' + module + ".txt", "w")
-    for requirement in possible_requirements :
+    for requirement in all_requirements :
         if len(dicto[requirement])>0 : 
            of.write("Requirement: " + requirement + "\n" )
            of.write("--------------------------------- \n")
