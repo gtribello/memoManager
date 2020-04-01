@@ -28,7 +28,7 @@ for name in staffdata :
 # for k,n in staffdict.items() : print( k, n )
 
 # List of possible student requirements
-possible_requirements = ["Green Room", "Individual room", "Cubical 6-8", "font size 18 on A4 paper", "Flexible deadlines for Assignments", "Permission to record lectures/tutorials", "Materials in alternative format", "Adjustments for Group work", "Adjustments for Oral Presentations", "Extra time", "Flexibility with deadlines", "Recording of Lectures", "Rest breaks"]
+possible_requirements = ["Green Room", "Individual room", "Cubical 6-8", "font size 18 on A4 paper", "Flexible deadlines for Assignments", "Permission to record lectures/tutorials", "Materials in alternative format", "Adjustments for Group work", "Adjustments for Oral Presentations", "Extra time", "Flexibility with deadlines", "Recording of Lectures", "Rest breaks","Rest Breaks"]
 
 # List of possible additional times
 extra_times = ["10","33","25","50","100"]
@@ -130,8 +130,14 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
        # Contribute to summary document of requirements 
        for requirement in possible_requirements :
            if( requirement=="Extra time" and text.find(requirement)!=-1 ) :
+               bstart = text.find("Extra time")
+               bend = text.find("Rest breaks")
+               bend2 = text.find("Rest Breaks")
+               if bend!=-1 : subtime = text[bstart:bend]
+               elif bend2!=-1 : subtime = text[bstart:bend2]
+               else : subtime = text[bstart:]
                for etime in extra_times :
-                   if( text.find(etime)!=-1 ) : special_requirements[requirement + "_" + etime].append( studentno )
+                   if( subtime.find(etime)!=-1 ) : special_requirements[requirement + "_" + etime].append( studentno )
            elif( text.find(requirement)!=-1 ) : special_requirements[requirement].append( studentno )
        # Now make copies for modules
        for module in thisstudent["modules"] :
@@ -141,7 +147,7 @@ for memo in os.listdir("/Users/gareth/Desktop/DS/2019/Downloadedmemos/") :
            for requirement in possible_requirements :
                if( requirement=="Extra time" and text.find(requirement)!=-1 ) :
                    for etime in extra_times : 
-                       if( text.find(etime)!=-1 ) : modteach[module][requirement + "_" + etime].append( studentno )
+                       if( subtime.find(etime)!=-1 ) : modteach[module][requirement + "_" + etime].append( studentno )
                elif( text.find(requirement)!=-1 ) : modteach[module][requirement].append( studentno )
            # Check if this is a project module and add to list of project students if it is
            if modteach[module]["project"] : modteach[module]["project_students"].append( studentno )
